@@ -1,7 +1,7 @@
 import sqlite3
 
 class MenuItem:
-    def __init__(self, name, description, price, calories):
+    def __init__(self, name, description, price, calories, category):
         """
         Initialize a MenuItem object.
 
@@ -9,11 +9,13 @@ class MenuItem:
         :param description: the description of the menu item
         :param price: the price of the menu item
         :param calories: the number of calories in the menu item
+        :param category: the category of the menu item
         """
         self.name = name
         self.description = description
         self.price = price
         self.calories = calories
+        self.category = category
 
     def __str__(self):
         return f"{self.name}: {self.description} ${self.price} ({self.calories} calories)"
@@ -57,7 +59,7 @@ class MenuRepository:
         self.conn = sqlite3.connect(db_name)
         self.cursor = self.conn.cursor()
         self.create_table()
-        self.add_test_data() # Add test data
+    #    self.add_test_data() # Add test data
 
     def create_table(self):
         self.cursor.execute("""
@@ -66,16 +68,17 @@ class MenuRepository:
                 name TEXT NOT NULL,
                 description TEXT,
                 price REAL NOT NULL,
-                calories INTEGER
+                calories INTEGER,
+                category TEXT NOT NULL
             );
         """)
         self.conn.commit()
 
     def create_menu_item(self, item):
         self.cursor.execute("""
-            INSERT INTO menu_items (name, description, price, calories)
-            VALUES (?, ?, ?, ?);
-        """, (item.name, item.description, item.price, item.calories))
+            INSERT INTO menu_items (name, description, price, calories, category)
+            VALUES (?, ?, ?, ?, ?);
+        """, (item.name, item.description, item.price, item.calories, item.category))
         self.conn.commit()
         return self.cursor.lastrowid
 
@@ -83,13 +86,13 @@ class MenuRepository:
         self.cursor.execute("SELECT * FROM menu_items WHERE id = ?;", (item_id,))
         row = self.cursor.fetchone()
         if row:
-            return MenuItem(row[1], row[2], row[3], row[4])
+            return MenuItem(row[1], row[2], row[3], row[4], row[5])
         return None
 
     def update_menu_item(self, item_id, updated_item):
         self.cursor.execute("""
             UPDATE menu_items
-            SET name = ?, description = ?, price = ?, calories = ?
+            SET name = ?, description = ?, price = ?, calories = ?, category = ?
             WHERE id = ?;
         """, (updated_item.name, updated_item.description, updated_item.price, updated_item.calories, item_id))
         self.conn.commit()
@@ -102,17 +105,41 @@ class MenuRepository:
         self.cursor.execute("SELECT * FROM menu_items;")
         rows = self.cursor.fetchall()
         menu_items = []
+        entrees = []
+        sides = []
+        beverages = []
+        desserts = []
+
         for row in rows:
-            menu_item = MenuItem(row[1], row[2], row[3], row[4])
+            menu_item = MenuItem(row[1], row[2], row[3], row[4], row[5])
             menu_items.append(menu_item)
-        return menu_items
+            if menu_item.category == "Entrees":
+                entrees.append(menu_item)
+            elif menu_item.category == "Sides":
+                sides.append(menu_item)
+            elif menu_item.category == "Beverages":
+                beverages.append(menu_item)
+            elif menu_item.category == "Desserts":
+                desserts.append(menu_item)
+        return {
+            "Entrees": entrees,
+            "Sides": sides,
+            "Beverages": beverages,
+            "Desserts": desserts
+        }
     
-    def add_test_data(self):
-        """Add test data to the menu"""
-        menu_items = [
-            MenuItem("Burger", "A juicy beef burger", 10.99, 500),
-            MenuItem("Fries", "Crispy french fries", 4.99, 200),
-            MenuItem("Soda", "A cold soda", 2.99, 150),
-        ]
-        for item in menu_items:
-            self.create_menu_item(item)
+    # def add_test_data(self):
+    #     """TESTING PURPOSES ONLY"""
+    #     self.cursor.execute("""
+    #         INSERT INTO menu_items (name, description, price, calories, category)
+    #         VALUES
+    #             ('Burger', 'A juicy beef burger', 10.99, 500, 'Entrees'),
+    #             ('Grilled Chicken', 'A grilled chicken breast', 9.99, 400, 'Entrees'),
+    #             ('Fries', 'Crispy french fries', 4.99, 200, 'Sides'),
+    #             ('Salad', 'A fresh green salad', 3.99, 100, 'Sides'),
+    #             ('Soda', 'A cold soda', 2.99, 150, 'Beverages'),
+    #             ('Iced Tea', 'A refreshing iced tea', 1.99, 0, 'Beverages'),
+    #             ('Ice Cream', 'A scoop of creamy ice cream', 5.99, 300, 'Desserts'),
+    #             ('Brownie', 'A rich, fudgy brownie', 4.99, 250, 'Desserts');
+    #     """)
+    #     self.conn.commit()

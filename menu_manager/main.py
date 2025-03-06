@@ -43,10 +43,11 @@ class MenuManagerApp:
         self.menu_text.delete(1.0, tk.END)
         menu_repo = MenuRepository("menu.db")
         menu_items = menu_repo.get_all_menu_items()
-        menu = Menu()
-        menu.items = menu_items
-        menu_text = str(menu)
-        self.menu_text.insert(tk.END, menu_text)
+        for category, items in menu_items.items():
+            self.menu_text.insert(tk.END, f"{category}:\n")
+            for item in items:
+                self.menu_text.insert(tk.END, f"  {item}\n")
+            self.menu_text.insert(tk.END, "\n")
         self.menu_text.config(state="disabled")
 
     def on_tab_change(self, event):
