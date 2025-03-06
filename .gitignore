@@ -1,0 +1,12 @@
+__pycache__
+*.db
+*.splite
+*.sqlite3
+menu_manager_venv
+*.pyc
+*.log
+*.tmp
+*.vscode/
+.DS_Store
+.AppleDouble
+.LSOverride
