@@ -7,7 +7,6 @@ class MenuManagerApp:
         self.root = root
         self.root.title("Menu Manager")
         self.root.geometry("800x600")
-        self.update_menu_text()
 
         # Create a notebook for tabs
         self.notebook = ttk.Notebook(self.root)
@@ -21,6 +20,7 @@ class MenuManagerApp:
         self.menu_text = tk.Text(self.menu_tab, width=80, height=20)
         self.menu_text.pack(pady=10)
         self.menu_text.config(state="disabled")
+        self.update_menu_text()
 
         # Create menu items tab
         self.menu_items_tab = tk.Frame(self.notebook)

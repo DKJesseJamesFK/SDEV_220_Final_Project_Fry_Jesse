@@ -57,6 +57,7 @@ class MenuRepository:
         self.conn = sqlite3.connect(db_name)
         self.cursor = self.conn.cursor()
         self.create_table()
+        self.add_test_data() # Add test data
 
     def create_table(self):
         self.cursor.execute("""
@@ -105,3 +106,13 @@ class MenuRepository:
             menu_item = MenuItem(row[1], row[2], row[3], row[4])
             menu_items.append(menu_item)
         return menu_items
+    
+    def add_test_data(self):
+        """Add test data to the menu"""
+        menu_items = [
+            MenuItem("Burger", "A juicy beef burger", 10.99, 500),
+            MenuItem("Fries", "Crispy french fries", 4.99, 200),
+            MenuItem("Soda", "A cold soda", 2.99, 150),
+        ]
+        for item in menu_items:
+            self.create_menu_item(item)
