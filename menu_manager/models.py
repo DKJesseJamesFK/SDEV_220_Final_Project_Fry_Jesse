@@ -96,3 +96,12 @@ class MenuRepository:
     def delete_menu_item(self, item_id):
         self.cursor.execute("DELETE FROM menu_items WHERE id = ?;", (item_id,))
         self.conn.commit()
+
+    def get_all_menu_items(self):
+        self.cursor.execute("SELECT * FROM menu_items;")
+        rows = self.cursor.fetchall()
+        menu_items = []
+        for row in rows:
+            menu_item = MenuItem(row[1], row[2], row[3], row[4])
+            menu_items.append(menu_item)
+        return menu_items
