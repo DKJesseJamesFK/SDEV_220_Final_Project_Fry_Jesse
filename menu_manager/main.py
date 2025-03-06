@@ -34,12 +34,6 @@ class MenuManagerApp:
         # Create inventory tab
         self.inventory_tab = tk.Frame(self.notebook)
         self.notebook.add(self.inventory_tab, text="Inventory")
-
-    """DELETE THIS LATER"""
-    # def generate_menu_text(self):
-    #     """Generates the menu text and returns it as a string."""
-    #     menu = Menu()
-    #     return str(menu)
     
     def update_menu_text(self):
         """Updates the menu text in the text widget."""
@@ -53,12 +47,6 @@ class MenuManagerApp:
                 self.menu_text.insert(tk.END, f"  {item}\n")
             self.menu_text.insert(tk.END, "\n")
         self.menu_text.config(state="disabled")
-
-    """DELETE THIS LATER"""
-    # def on_tab_change(self, event):
-    #     current_tab = self.notebook.index(self.notebook.select())
-    #     if current_tab == 0: # Menu tab
-    #         self.update_menu_text()
 
 if __name__ == "__main__":
     root = tk.Tk()
