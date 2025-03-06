@@ -21,6 +21,7 @@ class MenuItem:
         return f"{self.name}: {self.description} ${self.price} ({self.calories} calories)"
     
 class Menu:
+    """A class representing a menu of menu items."""
     def __init__(self):
         self.items = []
 
@@ -31,14 +32,17 @@ class Menu:
         return menu_str
     
 class Order:
+    """A class representing an order of menu items."""
     TAX_RATE = 0.07
     def __init__(self):
         self.items = []
 
     def add_item(self, item):
+        """Add a menu item to the order."""
         self.items.append(item)
 
     def total_cost(self):
+        """Calculate the total cost of the order, including subtotal, tax, and total."""
         subtotal = sum(item.price for item in self.items)
         total_tax = subtotal * Order.TAX_RATE
         total_cost = subtotal + total_tax
@@ -62,6 +66,7 @@ class MenuRepository:
     #    self.add_test_data() # Add test data
 
     def create_table(self):
+        """Create the menu_items table if it doesn't exist."""
         self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS menu_items (
                 id INTEGER PRIMARY KEY,
@@ -75,6 +80,7 @@ class MenuRepository:
         self.conn.commit()
 
     def create_menu_item(self, item):
+        """Add a menu item to the database."""
         self.cursor.execute("""
             INSERT INTO menu_items (name, description, price, calories, category)
             VALUES (?, ?, ?, ?, ?);
@@ -83,6 +89,7 @@ class MenuRepository:
         return self.cursor.lastrowid
 
     def get_menu(self, item_id):
+        """Return a single menu item from the database."""
         self.cursor.execute("SELECT * FROM menu_items WHERE id = ?;", (item_id,))
         row = self.cursor.fetchone()
         if row:
@@ -90,6 +97,7 @@ class MenuRepository:
         return None
 
     def update_menu_item(self, item_id, updated_item):
+        """Update a single menu item in the database."""
         self.cursor.execute("""
             UPDATE menu_items
             SET name = ?, description = ?, price = ?, calories = ?, category = ?
@@ -98,10 +106,12 @@ class MenuRepository:
         self.conn.commit()
 
     def delete_menu_item(self, item_id):
+        """Delete a single menu item from the database."""
         self.cursor.execute("DELETE FROM menu_items WHERE id = ?;", (item_id,))
         self.conn.commit()
 
     def get_all_menu_items(self):
+        """Return all menu items from the database. Separated by category."""
         self.cursor.execute("SELECT * FROM menu_items;")
         rows = self.cursor.fetchall()
         menu_items = []
