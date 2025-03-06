@@ -60,6 +60,11 @@ class Order:
 
 class MenuRepository:
     def __init__(self, db_name):
+        """
+        Initialize the MenuRepository object.
+
+        :param db_name: the name of the sqlite database file
+        """
         self.conn = sqlite3.connect(db_name)
         self.cursor = self.conn.cursor()
         self.create_table()
