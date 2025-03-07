@@ -83,7 +83,8 @@ class MenuManagerApp:
 
         self.category_label = tk.Label(self.menu_items_tab, text="Category:")
         self.category_label.pack()
-        self.category_entry = tk.Entry(self.menu_items_tab)
+        categories = list(self.menu_repo.get_all_menu_items().keys())
+        self.category_entry = ttk.Combobox(self.menu_items_tab, values=categories)
         self.category_entry.pack()
 
         self.save_button = tk.Button(self.menu_items_tab, text="Save", command=self.save_menu_item)
@@ -113,8 +114,8 @@ class MenuManagerApp:
                 self.price_entry.insert(tk.END, str(menu_item.price))
                 self.calories_entry.delete(0, tk.END)
                 self.calories_entry.insert(tk.END, str(menu_item.calories))
-                self.category_entry.delete(0, tk.END)
-                self.category_entry.insert(0, menu_item.category)
+                self.category_entry.set(menu_item.category)
+                self.category_entry.update_idletasks()
 
                 self.current_menu_item_id = menu_item_id  # Store ID for future use.
 
