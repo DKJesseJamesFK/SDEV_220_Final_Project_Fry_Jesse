@@ -107,13 +107,25 @@ class MenuRepository:
             UPDATE menu_items
             SET name = ?, description = ?, price = ?, calories = ?, category = ?
             WHERE id = ?;
-        """, (updated_item.name, updated_item.description, updated_item.price, updated_item.calories, item_id))
+        """, (updated_item.name, updated_item.description, updated_item.price, updated_item.calories, updated_item.category, item_id))
         self.conn.commit()
 
     def delete_menu_item(self, item_id):
         """Delete a single menu item from the database."""
         self.cursor.execute("DELETE FROM menu_items WHERE id = ?;", (item_id,))
         self.conn.commit()
+
+    def get_menu_item_by_name(self, name):
+        """Return a menu item and its ID from the database based on its name."""
+        print(f"Searching for menu item: {name}") # TESTING PURPOSES ONLY
+        self.cursor.execute("SELECT * FROM menu_items WHERE name = ?;", (name,))
+        row = self.cursor.fetchone()
+        if row:
+            print(f"Database row found {row}") # TESTING PURPOSES ONLY
+            menu_item = MenuItem(row[1], row[2], row[3], row[4], row[5])  # Create MenuItem object
+            return menu_item, row[0]  # Return both MenuItem object and its ID
+        print("Menu item not found in database.")
+        return None, None  # Return None if not found
 
     def get_all_menu_items(self):
         """Return all menu items from the database. Separated by category."""
