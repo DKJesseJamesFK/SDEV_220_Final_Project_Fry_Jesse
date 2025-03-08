@@ -197,6 +197,7 @@ class MenuManagerApp:
     # ORDERS
 
     def create_orders_tab(self):
+        """Creates the orders tab."""
 
         # Initialize self.order
         self.order = Order()
@@ -231,24 +232,9 @@ class MenuManagerApp:
         self.total_label = tk.Label(self.orders_tab, text="Total: $0.00")
         self.total_label.pack()
 
-    def add_item_to_order(self):
-        index = self.available_menu_items_listbox.curselection()
-        if index and index[0] >= 0:
-            menu_item_name = self.available_menu_items_listbox.get(index[0])
-            selected_item = self.menu_repo.get_menu_item_by_name(menu_item_name)
-            if selected_item:
-                # print(f"Selected item: {selected_item[0].name}, Price: {selected_item[0].price}") # TESTING PURPOSES ONLY
-                menu_item, _ = selected_item # Extract the MenuItem object from the tuple. THIS WAS DIFFICULT TO FIGURE OUT FOR ME
-                self.order.add_item(menu_item)
-                self.order_listbox.insert(tk.END, menu_item_name)
-                subtotal, tax, total = self.order.total_cost()
-                self.subtotal_label.config(text=f"Subtotal: ${subtotal:.2f}")
-                self.tax_label.config(text=f"Tax: ${tax:.2f}")
-                self.total_label.config(text=f"Total: ${total:.2f}")
-            else:
-                msgbox.showerror("Error", "Item not found in menu.")
-        else:
-            msgbox.showerror("Error", "Please select an item from the menu.")
+        # Create button to clear order
+        self.clear_order_button = tk.Button(self.orders_tab, text="Clear Order", command=self.clear_order)
+        self.clear_order_button.pack()
 
     # INVENTORY
 
