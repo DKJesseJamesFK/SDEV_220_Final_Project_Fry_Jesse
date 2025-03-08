@@ -9,7 +9,7 @@ class MenuManagerApp:
         self.root = root
         self.root.title("Menu Manager")
         self.root.geometry("800x600")
-        self.menu_repo = MenuRepository("menu.db") #NEW
+        self.menu_repo = MenuRepository("menu.db")
 
         # Create a notebook for tabs
         self.notebook = ttk.Notebook(self.root)
@@ -28,7 +28,7 @@ class MenuManagerApp:
         # Create menu items tab
         self.menu_items_tab = tk.Frame(self.notebook)
         self.notebook.add(self.menu_items_tab, text="Menu Items")
-        self.create_menu_items_tab() #NEW
+        self.create_menu_items_tab()
 
         # Create orders tab
         self.orders_tab = tk.Frame(self.notebook)
@@ -50,49 +50,62 @@ class MenuManagerApp:
             self.menu_text.insert(tk.END, "\n")
         self.menu_text.config(state="disabled")
 
-    # NEWv
+    
     def create_menu_items_tab(self):
+        """Creates GUI elements for menu items tab."""
+
+        # Create listbox to display menu items
         self.menu_items_listbox = tk.Listbox(self.menu_items_tab)
         self.menu_items_listbox.pack()
 
+        # Create Edit button
         self.edit_button = tk.Button(self.menu_items_tab, text="Edit", command=self.edit_menu_item)
         self.edit_button.pack()
 
+        # Create Delete button
         self.delete_button = tk.Button(self.menu_items_tab, text="Delete", command=self.delete_menu_item)
         self.delete_button.pack()
 
+        # Create Name form field
         self.name_label = tk.Label(self.menu_items_tab, text="Name:")
         self.name_label.pack()
         self.name_entry = tk.Entry(self.menu_items_tab)
         self.name_entry.pack()
 
+        # Create Description form field
         self.description_label = tk.Label(self.menu_items_tab, text="Description:")
         self.description_label.pack()
         self.description_entry = tk.Entry(self.menu_items_tab)
         self.description_entry.pack()
 
+        # Create Price form field
         self.price_label = tk.Label(self.menu_items_tab, text="Price:")
         self.price_label.pack()
         self.price_entry = tk.Entry(self.menu_items_tab)
         self.price_entry.pack()
 
+        # Create Calories form field
         self.calories_label = tk.Label(self.menu_items_tab, text="Calories:")
         self.calories_label.pack()
         self.calories_entry = tk.Entry(self.menu_items_tab)
         self.calories_entry.pack()
 
+        # Create Category dropdown
         self.category_label = tk.Label(self.menu_items_tab, text="Category:")
         self.category_label.pack()
         categories = list(self.menu_repo.get_all_menu_items().keys())
         self.category_entry = ttk.Combobox(self.menu_items_tab, values=categories)
         self.category_entry.pack()
 
+        # Create Save button
         self.save_button = tk.Button(self.menu_items_tab, text="Save", command=self.save_menu_item)
         self.save_button.pack()
 
+        # Populate menu items list
         self.update_menu_items_list()
 
     def update_menu_items_list(self):
+        """Updates the menu items list in the listbox."""
         self.menu_items_listbox.delete(0, tk.END)
         menu_items = self.menu_repo.get_all_menu_items()
         for category, items in menu_items.items():
@@ -100,7 +113,8 @@ class MenuManagerApp:
                 self.menu_items_listbox.insert(tk.END, item.name)
 
     def edit_menu_item(self):
-        print("Edit menu item") # TESTING PURPOSES ONLY
+        """Populates the form fields with the selected menu item's details for editing."""
+        # print("Edit menu item") # TESTING PURPOSES ONLY
         index = self.menu_items_listbox.curselection()
         if index:
             menu_item_name = self.menu_items_listbox.get(index[0])
@@ -120,7 +134,8 @@ class MenuManagerApp:
                 self.current_menu_item_id = menu_item_id  # Store ID for future use.
 
     def delete_menu_item(self):
-        print("Delete menu item") # TESTING PURPOSES ONLY
+        """Deletes the selected menu item from the database."""
+        # print("Delete menu item") # TESTING PURPOSES ONLY
         index = self.menu_items_listbox.curselection()
         if index:
             menu_item_name = self.menu_items_listbox.get(index[0])
@@ -130,6 +145,7 @@ class MenuManagerApp:
                 self.update_menu_items_list()
 
     def save_menu_item(self):
+        """Saves the updated or new menu item to the database."""
         print("Save menu item") # TESTING PURPOSES ONLY
         menu_item_name = self.name_entry.get().strip()
         menu_item_description = self.description_entry.get().strip()
@@ -141,13 +157,14 @@ class MenuManagerApp:
             msgbox.showerror("Error", "Please enter a name and category for the menu item.")
             return
         
-        try:
+        try: # Input validation
             menu_item_price = float(menu_item_price)
             menu_item_calories = int(menu_item_calories)
         except ValueError:
             msgbox.showerror("Error", "Please enter a valid price and calories for the menu item.")
             return
         
+        # Create MenuItem object
         menu_item = MenuItem(menu_item_name, menu_item_description, menu_item_price, menu_item_calories, menu_item_category)
 
         if hasattr(self, "current_menu_item_id") and self.current_menu_item_id:
@@ -165,13 +182,12 @@ class MenuManagerApp:
         self.update_menu_text()
 
     def clear_form_fields(self):
+        """Clears the form fields."""
         self.name_entry.delete(0, tk.END)
         self.description_entry.delete(0, tk.END)
         self.price_entry.delete(0, tk.END)
         self.calories_entry.delete(0, tk.END)
         self.category_entry.delete(0, tk.END)
-
-        # NEW^
 
 if __name__ == "__main__":
     root = tk.Tk()

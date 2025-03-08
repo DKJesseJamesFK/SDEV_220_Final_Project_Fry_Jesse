@@ -1,6 +1,7 @@
 import sqlite3
 
 class MenuItem:
+    """A class representing a menu item."""
     def __init__(self, name, description, price, calories, category):
         """
         Initialize a MenuItem object.
@@ -59,6 +60,7 @@ class Order:
         return order_str
 
 class MenuRepository:
+    """A class for interacting with the menu database."""
     def __init__(self, db_name):
         """
         Initialize the MenuRepository object.
@@ -117,14 +119,14 @@ class MenuRepository:
 
     def get_menu_item_by_name(self, name):
         """Return a menu item and its ID from the database based on its name."""
-        print(f"Searching for menu item: {name}") # TESTING PURPOSES ONLY
+        # print(f"Searching for menu item: {name}") # TESTING PURPOSES ONLY
         self.cursor.execute("SELECT * FROM menu_items WHERE name = ?;", (name,))
         row = self.cursor.fetchone()
         if row:
-            print(f"Database row found {row}") # TESTING PURPOSES ONLY
+            # print(f"Database row found {row}") # TESTING PURPOSES ONLY
             menu_item = MenuItem(row[1], row[2], row[3], row[4], row[5])  # Create MenuItem object
             return menu_item, row[0]  # Return both MenuItem object and its ID
-        print("Menu item not found in database.")
+        # print("Menu item not found in database.") # TESTING PURPOSES ONLY
         return None, None  # Return None if not found
 
     def get_all_menu_items(self):
