@@ -3,6 +3,8 @@ import tkinter.ttk as ttk
 from tkinter import messagebox as msgbox
 from models import *
 
+# MENU
+
 class MenuManagerApp:
     """The main application class. It is a Tkinter window with tabs for menu, menu items, orders, and inventory."""
     def __init__(self, root):
@@ -33,6 +35,7 @@ class MenuManagerApp:
         # Create orders tab
         self.orders_tab = tk.Frame(self.notebook)
         self.notebook.add(self.orders_tab, text="Orders")
+        self.create_orders_tab()
 
         # Create inventory tab
         self.inventory_tab = tk.Frame(self.notebook)
@@ -49,6 +52,8 @@ class MenuManagerApp:
                 self.menu_text.insert(tk.END, f"  {item}\n")
             self.menu_text.insert(tk.END, "\n")
         self.menu_text.config(state="disabled")
+
+        # MENU ITEMS
 
     
     def create_menu_items_tab(self):
@@ -188,6 +193,64 @@ class MenuManagerApp:
         self.price_entry.delete(0, tk.END)
         self.calories_entry.delete(0, tk.END)
         self.category_entry.delete(0, tk.END)
+
+    # ORDERS
+
+    def create_orders_tab(self):
+
+        # Initialize self.order
+        self.order = Order()
+
+        # Create label to display "Order"
+        self.order_label = tk.Label(self.orders_tab, text="Order")
+        self.order_label.pack()
+
+        # Create listbox to display available menu items
+        self.available_menu_items_listbox = tk.Listbox(self.orders_tab)
+        self.available_menu_items_listbox.pack()
+
+        # Populate listbox with available menu items
+        menu_items = self.menu_repo.get_all_menu_items()
+        for category, items in menu_items.items():
+            for item in items:
+                self.available_menu_items_listbox.insert(tk.END, item.name)
+
+        # Create button to add item to order
+        self.add_item_button = tk.Button(self.orders_tab, text="Add Item", command=self.add_item_to_order)
+        self.add_item_button.pack()
+
+        # Create listbox to display items in order
+        self.order_listbox = tk.Listbox(self.orders_tab)
+        self.order_listbox.pack()
+
+        # Create labels to display subtotal, tax, and total
+        self.subtotal_label = tk.Label(self.orders_tab, text="Subtotal: $0.00")
+        self.subtotal_label.pack()
+        self.tax_label = tk.Label(self.orders_tab, text="Tax: $0.00")
+        self.tax_label.pack()
+        self.total_label = tk.Label(self.orders_tab, text="Total: $0.00")
+        self.total_label.pack()
+
+    def add_item_to_order(self):
+        index = self.available_menu_items_listbox.curselection()
+        if index and index[0] >= 0:
+            menu_item_name = self.available_menu_items_listbox.get(index[0])
+            selected_item = self.menu_repo.get_menu_item_by_name(menu_item_name)
+            if selected_item:
+                # print(f"Selected item: {selected_item[0].name}, Price: {selected_item[0].price}") # TESTING PURPOSES ONLY
+                menu_item, _ = selected_item # Extract the MenuItem object from the tuple. THIS WAS DIFFICULT TO FIGURE OUT FOR ME
+                self.order.add_item(menu_item)
+                self.order_listbox.insert(tk.END, menu_item_name)
+                subtotal, tax, total = self.order.total_cost()
+                self.subtotal_label.config(text=f"Subtotal: ${subtotal:.2f}")
+                self.tax_label.config(text=f"Tax: ${tax:.2f}")
+                self.total_label.config(text=f"Total: ${total:.2f}")
+            else:
+                msgbox.showerror("Error", "Item not found in menu.")
+        else:
+            msgbox.showerror("Error", "Please select an item from the menu.")
+
+    # INVENTORY
 
 if __name__ == "__main__":
     root = tk.Tk()

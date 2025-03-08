@@ -44,6 +44,7 @@ class Order:
 
     def total_cost(self):
         """Calculate the total cost of the order, including subtotal, tax, and total."""
+        print()
         subtotal = sum(item.price for item in self.items)
         total_tax = subtotal * Order.TAX_RATE
         total_cost = subtotal + total_tax
