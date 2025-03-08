@@ -40,6 +40,7 @@ class MenuManagerApp:
         # Create inventory tab
         self.inventory_tab = tk.Frame(self.notebook)
         self.notebook.add(self.inventory_tab, text="Inventory")
+        self.create_inventory_tab()
     
     def update_menu_text(self):
         """Updates the menu text in the text widget."""
@@ -265,6 +266,68 @@ class MenuManagerApp:
         self.total_label.config(text="Total: $0.00")
 
     # INVENTORY
+
+    def create_inventory_tab(self):
+        """Creates the inventory tab."""
+
+        # Create listbox to display inventory items
+        self.inventory_listbox = tk.Listbox(self.inventory_tab)
+        self.inventory_listbox.pack()
+
+        # Create form to add new items
+        self.add_item_label = tk.Label(self.inventory_tab, text="Add Item:")
+        self.add_item_label.pack()
+        self.add_item_name_entry = tk.Entry(self.inventory_tab)
+        self.add_item_name_entry.pack()
+        self.add_item_quantity_entry = tk.Entry(self.inventory_tab)
+        self.add_item_quantity_entry.pack()
+        self.add_item_category_entry = tk.Entry(self.inventory_tab)
+        self.add_item_category_entry.pack()
+        self.add_item_button = tk.Button(self.inventory_tab, text="Add Item", command=self.add_item_to_inventory)
+        self.add_item_button.pack()
+
+        # Create buttons to edit and delete existing items
+        self.edit_item_button = tk.Button(self.inventory_tab, text="Edit Item", command=self.edit_item_in_inventory)
+        self.edit_item_button.pack()
+        self.delete_item_button = tk.Button(self.inventory_tab, text="Delete Item", command=self.delete_item_from_inventory)
+        self.delete_item_button.pack()
+
+        # Populate listbox with inventory items
+        self.update_inventory_listbox()
+
+    def add_item_to_inventory(self):
+        """Adds a new item to the inventory."""
+        item_name = self.add_item_name_entry.get().strip()
+        item_quantity = self.add_item_quantity_entry.get().strip()
+        item_category = self.add_item_category_entry.get().strip()
+
+        if not item_name or not item_quantity or not item_category:
+            msgbox.showerror("Error", "Please enter all fields.")
+            return
+
+        try:
+            item_quantity = int(item_quantity)
+        except ValueError:
+            msgbox.showerror("Error", "Please enter a valid quantity.")
+            return
+
+        inventory_repo = InventoryRepository("inventory.db")
+        inventory_repo.create_inventory_item(item_name, item_quantity, item_category)
+        self.update_inventory_listbox()
+
+    def update_inventory_listbox(self):
+        """Updates the listbox with the inventory items."""
+        self.inventory_listbox.delete(0, tk.END)
+        inventory_repo = InventoryRepository("inventory.db")
+        inventory_items = inventory_repo.get_all_inventory_items()
+        for item in inventory_items:
+            self.inventory_listbox.insert(tk.END, f"{item['item_name']} - {item['quantity']} - {item['category']}")
+
+    def edit_item_in_inventory(self):
+        pass
+
+    def delete_item_from_inventory(self):
+        pass
 
 if __name__ == "__main__":
     root = tk.Tk()

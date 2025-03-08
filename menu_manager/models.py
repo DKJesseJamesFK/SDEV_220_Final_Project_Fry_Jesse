@@ -174,3 +174,66 @@ class MenuRepository:
     #             ('Brownie', 'A rich, fudgy brownie', 4.99, 250, 'Desserts');
     #     """)
     #     self.conn.commit()
+
+class InventoryRepository:
+    def __init__(self, db_path):
+        self.conn = sqlite3.connect(db_path)
+        self.cursor = self.conn.cursor()
+        self.create_inventory_table()
+
+    def create_inventory_table(self):
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS inventory (
+                id INTEGER PRIMARY KEY,
+                item_name TEXT NOT NULL,
+                quantity INTEGER NOT NULL,
+                category TEXT
+            );
+        """)
+        self.conn.commit()
+
+    def create_inventory_item(self, item_name, quantity, category):
+        self.cursor.execute("""
+            INSERT INTO inventory (item_name, quantity, category)
+            VALUES (?, ?, ?);
+        """, (item_name, quantity, category))
+        self.conn.commit()
+
+    def get_inventory_item(self, item_id):
+        self.cursor.execute("SELECT * FROM inventory WHERE id = ?;", (item_id,))
+        row = self.cursor.fetchone()
+        if row:
+            return {
+                "id": row[0],
+                "item_name": row[1],
+                "quantity": row[2],
+                "category": row[3]
+            }
+        return None
+
+    def update_inventory_item(self, item_id, item_name, quantity, category):
+        self.cursor.execute("""
+            UPDATE inventory
+            SET item_name = ?, quantity = ?, category = ?
+            WHERE id = ?;
+        """, (item_name, quantity, category, item_id))
+        self.conn.commit()
+
+    def delete_inventory_item(self, item_id):
+        self.cursor.execute("DELETE FROM inventory WHERE id = ?;", (item_id,))
+        self.conn.commit()
+
+    def get_all_inventory_items(self):
+        """Gets all inventory items from the database."""
+        self.cursor.execute("SELECT * FROM inventory;")
+        rows = self.cursor.fetchall()
+        inventory_items = []
+        for row in rows:
+            inventory_item = {
+                "id": row[0],
+                "item_name": row[1],
+                "quantity": row[2],
+                "category": row[3]
+            }
+            inventory_items.append(inventory_item)
+        return inventory_items
