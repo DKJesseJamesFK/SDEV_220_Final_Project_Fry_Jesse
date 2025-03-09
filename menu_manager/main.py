@@ -11,8 +11,8 @@ class MenuManagerApp:
         self.root = root
         self.root.title("Menu Manager")
         self.root.geometry("800x600")
-        self.menu_repo = MenuRepository("menu.db")
-        self.inventory_repo = InventoryRepository("inventory.db")
+        self.menu_repo = MenuRepository("menu_manager/database/menu.db")
+        self.inventory_repo = InventoryRepository("menu_manager/database/inventory.db")
 
         # Create a notebook for tabs
         self.notebook = ttk.Notebook(self.root)
@@ -341,7 +341,7 @@ class MenuManagerApp:
     def update_inventory_listbox(self):
         """Updates the listbox with the inventory items."""
         self.inventory_listbox.delete(0, tk.END)
-        inventory_repo = InventoryRepository("inventory.db")
+        inventory_repo = InventoryRepository("menu_manager/database/inventory.db")
         inventory_items = inventory_repo.get_all_inventory_items()
         for item in inventory_items:
             self.inventory_listbox.insert(tk.END, f"{item['item_name']} - {item['quantity']} - {item['category']}")
