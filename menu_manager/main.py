@@ -329,6 +329,7 @@ class MenuManagerApp:
             else:
                 return
 
+        self.current_inventory_item_id = existing_item["id"] if existing_item else None
         if self.current_inventory_item_id:
             self.inventory_repo.update_inventory_item(self.current_inventory_item_id, item_name, quantity, category)
         else:
