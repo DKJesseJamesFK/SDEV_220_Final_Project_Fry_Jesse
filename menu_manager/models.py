@@ -237,3 +237,18 @@ class InventoryRepository:
             }
             inventory_items.append(inventory_item)
         return inventory_items
+    
+    def get_inventory_item_by_name(self, name):
+        """Gets an inventory item by name."""
+        self.cursor.execute("SELECT * FROM inventory WHERE item_name = ?", (name,))
+        row = self.cursor.fetchone()
+        if row:
+            inventory_item = {
+                "id": row[0],
+                "name": row[1],
+                "quantity": row[2],
+                "category": row[3]
+            }
+            return inventory_item
+        else:
+            return None

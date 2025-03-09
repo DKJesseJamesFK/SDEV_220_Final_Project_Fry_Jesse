@@ -12,6 +12,7 @@ class MenuManagerApp:
         self.root.title("Menu Manager")
         self.root.geometry("800x600")
         self.menu_repo = MenuRepository("menu.db")
+        self.inventory_repo = InventoryRepository("inventory.db")
 
         # Create a notebook for tabs
         self.notebook = ttk.Notebook(self.root)
@@ -53,6 +54,21 @@ class MenuManagerApp:
                 self.menu_text.insert(tk.END, f"  {item}\n")
             self.menu_text.insert(tk.END, "\n")
         self.menu_text.config(state="disabled")
+
+    def clear_form_fields(self, form_type=None):
+        """Clears the form fields for menu items and inventory items."""
+        if form_type == "menu_item":
+            self.name_entry.delete(0, tk.END)
+            self.description_entry.delete(0, tk.END)
+            self.price_entry.delete(0, tk.END)
+            self.calories_entry.delete(0, tk.END)
+            self.category_entry.delete(0, tk.END)
+        elif form_type == "inventory_item":
+            self.add_item_name_entry.delete(0, tk.END)
+            self.add_item_quantity_entry.delete(0, tk.END)
+            self.add_item_category_entry.set("")
+        else:
+            raise ValueError("Invalid form type")
 
         # MENU ITEMS
 
@@ -184,16 +200,10 @@ class MenuManagerApp:
             msgbox.showinfo("Success", "Menu item created successfully.")
 
         self.update_menu_items_list()
-        self.clear_form_fields() # Clear input fields after saving
+        self.clear_form_fields("menu_item") # Clear input fields after saving
         self.update_menu_text()
 
-    def clear_form_fields(self):
-        """Clears the form fields."""
-        self.name_entry.delete(0, tk.END)
-        self.description_entry.delete(0, tk.END)
-        self.price_entry.delete(0, tk.END)
-        self.calories_entry.delete(0, tk.END)
-        self.category_entry.delete(0, tk.END)
+
 
     # ORDERS
 
@@ -277,13 +287,20 @@ class MenuManagerApp:
         # Create form to add new items
         self.add_item_label = tk.Label(self.inventory_tab, text="Add Item:")
         self.add_item_label.pack()
+        self.add_item_name_label = tk.Label(self.inventory_tab, text="Name:")
+        self.add_item_name_label.pack()
         self.add_item_name_entry = tk.Entry(self.inventory_tab)
         self.add_item_name_entry.pack()
+        self.add_item_quantity_label = tk.Label(self.inventory_tab, text="Quantity:")
+        self.add_item_quantity_label.pack()
         self.add_item_quantity_entry = tk.Entry(self.inventory_tab)
         self.add_item_quantity_entry.pack()
-        self.add_item_category_entry = tk.Entry(self.inventory_tab)
+        self.add_item_category_label = tk.Label(self.inventory_tab, text="Category:")
+        self.add_item_category_label.pack()
+        categories = ["Food", "Cleaning Supplies", "Misc"]
+        self.add_item_category_entry = ttk.Combobox(self.inventory_tab, values=categories)
         self.add_item_category_entry.pack()
-        self.add_item_button = tk.Button(self.inventory_tab, text="Add Item", command=self.add_item_to_inventory)
+        self.add_item_button = tk.Button(self.inventory_tab, text="Save", command=self.add_item_to_inventory)
         self.add_item_button.pack()
 
         # Create buttons to edit and delete existing items
@@ -296,24 +313,30 @@ class MenuManagerApp:
         self.update_inventory_listbox()
 
     def add_item_to_inventory(self):
-        """Adds a new item to the inventory."""
-        item_name = self.add_item_name_entry.get().strip()
-        item_quantity = self.add_item_quantity_entry.get().strip()
-        item_category = self.add_item_category_entry.get().strip()
+        """Adds a new item to the inventory, or updates an existing item if self.current_inventory_item_id is set."""
+        item_name = self.add_item_name_entry.get()
+        quantity = int(self.add_item_quantity_entry.get())
+        category = self.add_item_category_entry.get()
 
-        if not item_name or not item_quantity or not item_category:
-            msgbox.showerror("Error", "Please enter all fields.")
-            return
+        existing_item = self.inventory_repo.get_inventory_item_by_name(item_name)
 
-        try:
-            item_quantity = int(item_quantity)
-        except ValueError:
-            msgbox.showerror("Error", "Please enter a valid quantity.")
-            return
+        if existing_item and not self.current_inventory_item_id:
+            confirm_message = f"An item with the name '{item_name}' already exists. Do you want to update it?"
+            confirm = msgbox.askyesno("Confirm Update", confirm_message)
 
-        inventory_repo = InventoryRepository("inventory.db")
-        inventory_repo.create_inventory_item(item_name, item_quantity, item_category)
+            if confirm:
+                self.current_inventory_item_id = existing_item["id"]
+            else:
+                return
+
+        if self.current_inventory_item_id:
+            self.inventory_repo.update_inventory_item(self.current_inventory_item_id, item_name, quantity, category)
+        else:
+            self.inventory_repo.create_inventory_item(item_name, quantity, category)
+
         self.update_inventory_listbox()
+        self.clear_form_fields("inventory_item")
+        self.current_inventory_item_id = None
 
     def update_inventory_listbox(self):
         """Updates the listbox with the inventory items."""
@@ -324,10 +347,41 @@ class MenuManagerApp:
             self.inventory_listbox.insert(tk.END, f"{item['item_name']} - {item['quantity']} - {item['category']}")
 
     def edit_item_in_inventory(self):
-        pass
+        """Populates the form fields with the selected inventory item's details for editing."""
+        index = self.inventory_listbox.curselection()
+        # print("Index:", index) # TESTING PURPOSES ONLY
+        if index:
+            inventory_item_name = self.inventory_listbox.get(index[0])
+            # print("Inventory item name:", inventory_item_name) # TESTING PURPOSES ONLY
+            # Extract just the item name from the string
+            item_name = inventory_item_name.split(' - ')[0]
+            # print("Item name:", item_name) # TESTING PURPOSES ONLY
+            inventory_item = self.inventory_repo.get_inventory_item_by_name(item_name)
+            # print("Inventory item:", inventory_item) # TESTING PURPOSES ONLY
+            if inventory_item:
+                self.add_item_name_entry.delete(0, tk.END)
+                self.add_item_name_entry.insert(0, inventory_item["name"])
+                # print("Add item name entry:", self.add_item_name_entry.get()) # TESTING PURPOSES ONLY
+                self.add_item_quantity_entry.delete(0, tk.END)
+                self.add_item_quantity_entry.insert(tk.END, str(inventory_item["quantity"]))
+                # print("Add item quantity entry:", self.add_item_quantity_entry.get()) # TESTING PURPOSES ONLY
+                self.add_item_category_entry.set(inventory_item["category"])
+                # print("Add item category entry:", self.add_item_category_entry.get()) # TESTING PURPOSES ONLY
+                self.add_item_category_entry.update_idletasks()
+
+                self.current_inventory_item_id = inventory_item["id"]  # Store ID for future use.
 
     def delete_item_from_inventory(self):
-        pass
+        """Deletes the selected inventory item."""
+        if self.current_inventory_item_id:
+            confirm_message = f"Are you sure you want to delete the item with ID {self.current_inventory_item_id}?"
+            confirm = msgbox.askyesno("Confirm Delete", confirm_message)
+
+            if confirm:
+                self.inventory_repo.delete_inventory_item(self.current_inventory_item_id)
+                self.update_inventory_listbox()
+                self.clear_form_fields("inventory_item")
+                self.current_inventory_item_id = None
 
 if __name__ == "__main__":
     root = tk.Tk()
